@@ -707,104 +707,64 @@
       font-family: 'Exo 2', sans-serif;
     }
 
-    /* Trainers Section */
-    .trainers {
-      background: var(--bg-dark-2);
+    /* WhatsApp Section */
+    .whatsapp {
+      background: linear-gradient(180deg, var(--bg-dark) 0%, var(--bg-dark-2) 50%, var(--bg-dark) 100%);
     }
 
-    .trainers-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 40px;
-      max-width: 1400px;
+    .whatsapp-content {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      max-width: 600px;
       margin: 0 auto;
     }
 
-    .trainer-card {
-      background: linear-gradient(180deg, rgba(20, 20, 20, 0.9) 0%, rgba(10, 10, 10, 0.9) 100%);
-      border: 1px solid rgba(255, 77, 0, 0.2);
-      border-radius: 30px;
-      overflow: hidden;
-      transition: all 0.5s ease;
-    }
-
-    .trainer-card:hover {
-      transform: translateY(-20px) rotateX(5deg);
-      border-color: var(--accent-orange);
-      box-shadow: 0 30px 60px rgba(255, 77, 0, 0.3);
-    }
-
-    .trainer-image {
-      aspect-ratio: 3/4;
-      background: linear-gradient(180deg, rgba(255, 77, 0, 0.1) 0%, rgba(10, 10, 10, 0.9) 100%);
+    .whatsapp-button {
       display: flex;
       align-items: center;
-      justify-content: center;
+      gap: 20px;
+      background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+      padding: 30px 50px;
+      border-radius: 30px;
+      text-decoration: none;
+      transition: all 0.4s ease;
       position: relative;
       overflow: hidden;
     }
 
-    .trainer-image img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: transform 0.5s ease;
-    }
-
-    .trainer-card:hover .trainer-image img {
-      transform: scale(1.1);
-    }
-
-    .trainer-image::before {
+    .whatsapp-button::before {
       content: '';
       position: absolute;
-      width: 150px;
-      height: 150px;
-      background: radial-gradient(circle, var(--accent-orange) 0%, transparent 70%);
-      opacity: 0.3;
-      animation: trainerGlow 3s ease-in-out infinite;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transition: left 0.5s ease;
     }
 
-    @keyframes trainerGlow {
-      0%, 100% { transform: scale(1); opacity: 0.3; }
-      50% { transform: scale(1.5); opacity: 0.1; }
+    .whatsapp-button:hover::before {
+      left: 100%;
     }
 
-    .trainer-image::after {
+    .whatsapp-button:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 30px 60px rgba(37, 211, 102, 0.4);
+    }
+
+    .whatsapp-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .whatsapp-text {
       font-family: 'Orbitron', sans-serif;
       font-size: 20px;
-      letter-spacing: 5px;
-      color: rgba(255, 255, 255, 0.3);
-    }
-
-    .trainer-card:nth-child(1) .trainer-image::after { content: 'MARCUS'; }
-    .trainer-card:nth-child(2) .trainer-image::after { content: 'SARAH'; }
-    .trainer-card:nth-child(3) .trainer-image::after { content: 'DEVON'; }
-
-    .trainer-info {
-      padding: 30px;
-    }
-
-    .trainer-info h3 {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 28px;
       font-weight: 700;
-      margin-bottom: 10px;
-    }
-
-    .trainer-specialty {
-      color: var(--accent-orange);
-      font-size: 14px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 3px;
-      margin-bottom: 20px;
-    }
-
-    .trainer-info p {
-      color: var(--text-gray);
-      font-size: 16px;
-      line-height: 1.6;
+      letter-spacing: 2px;
+      color: var(--text-white);
     }
 
     /* Pricing Section */
@@ -1150,9 +1110,6 @@
       .services-grid {
         grid-template-columns: repeat(2, 1fr);
       }
-      .trainers-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
     }
 
     @media (max-width: 1024px) {
@@ -1190,7 +1147,7 @@
       .section-header h2 {
         font-size: 36px;
       }
-      .services-grid, .trainers-grid, .pricing-grid {
+      .services-grid, .pricing-grid {
         grid-template-columns: 1fr;
       }
       .pricing-card.featured {
@@ -1237,8 +1194,7 @@
     <ul class="nav-links">
       <li><a href="#about">About</a></li>
       <li><a href="#services">Services</a></li>
-      <li><a href="#trainers">Trainers</a></li>
-      <li><a href="#pricing">Pricing</a></li>
+            <li><a href="#pricing">Pricing</a></li>
       <li><a href="#contact">Contact</a></li>
     </ul>
     <a href="#pricing" class="nav-cta">Join Now</a>
@@ -1252,8 +1208,7 @@
   <div class="mobile-menu" id="mobileMenu">
     <a href="#about" onclick="toggleMenu()">About</a>
     <a href="#services" onclick="toggleMenu()">Services</a>
-    <a href="#trainers" onclick="toggleMenu()">Trainers</a>
-    <a href="#pricing" onclick="toggleMenu()">Pricing</a>
+        <a href="#pricing" onclick="toggleMenu()">Pricing</a>
     <a href="#contact" onclick="toggleMenu()">Contact</a>
   </div>
 
@@ -1356,37 +1311,21 @@
     </div>
   </section>
 
-  <!-- Trainers Section -->
-  <section class="trainers" id="trainers">
+  <!-- WhatsApp Section -->
+  <section class="whatsapp" id="whatsapp">
     <div class="section-header">
-      <h2>MEET OUR <span>TRAINERS</span></h2>
-      <p>Expert guidance from certified professionals who live for fitness.</p>
+      <h2>CHAT WITH <span>US</span></h2>
+      <p>Have questions? Reach out instantly on WhatsApp!</p>
     </div>
-    <div class="trainers-grid">
-      <div class="trainer-card">
-        <div class="trainer-image"><img src="https://picsum.photos/seed/marcus/400/600" alt="Marcus Chen"></div>
-        <div class="trainer-info">
-          <h3>Marcus Chen</h3>
-          <div class="trainer-specialty">Strength & Conditioning</div>
-          <p>Former collegiate athlete with 12 years of coaching experience specializing in power and explosiveness.</p>
-        </div>
-      </div>
-      <div class="trainer-card">
-        <div class="trainer-image"><img src="https://picsum.photos/seed/sarah/400/600" alt="Sarah Williams"></div>
-        <div class="trainer-info">
-          <h3>Sarah Williams</h3>
-          <div class="trainer-specialty">HIIT & Nutrition</div>
-          <p>Certified nutrition coach helping clients achieve sustainable results through balanced training and diet.</p>
-        </div>
-      </div>
-      <div class="trainer-card">
-        <div class="trainer-image"><img src="https://picsum.photos/seed/devon/400/600" alt="Devon Brooks"></div>
-        <div class="trainer-info">
-          <h3>Devon Brooks</h3>
-          <div class="trainer-specialty">Combat & Functional</div>
-          <p>Professional MMA fighter bringing high-intensity combat sports training to the gym floor.</p>
-        </div>
-      </div>
+    <div class="whatsapp-content">
+      <a href="https://wa.me/919318334814" class="whatsapp-button" target="_blank">
+        <span class="whatsapp-icon">
+          <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17.472 14.382C17.164 14.107 16.787 13.988 16.402 14.012C16.017 14.036 15.65 14.192 15.371 14.467L14.253 15.561C12.547 14.757 11.143 13.353 10.339 11.647L11.443 10.529C11.718 10.25 11.874 9.883 11.898 9.498C11.922 9.113 11.803 8.736 11.528 8.428C11.253 8.12 10.859 7.907 10.426 7.837C9.993 7.767 9.554 7.844 9.181 8.055C7.813 8.739 6.787 9.977 6.261 11.459C5.735 12.941 5.753 14.551 6.312 16.024C6.871 17.497 7.928 18.758 9.352 19.559C10.776 20.36 12.386 20.458 13.933 20.019C15.48 19.58 16.812 18.641 17.763 17.375C18.714 16.109 19.241 14.583 19.271 13.007C19.301 11.431 18.931 9.883 18.213 8.557C17.495 7.231 16.462 6.185 15.235 5.533C14.008 4.881 12.641 4.652 11.302 4.879C9.963 5.106 8.714 5.684 7.706 6.561C7.482 6.766 7.301 7.021 7.175 7.311C7.049 7.601 6.981 7.919 6.986 8.241V8.621C6.994 9.052 7.087 9.477 7.259 9.868C7.431 10.259 7.679 10.608 7.988 10.885L8.548 11.404C9.145 11.947 9.868 12.333 10.648 12.527C11.428 12.721 12.241 12.717 13.018 12.515C13.795 12.313 14.512 11.921 15.104 11.374L15.404 11.103C15.612 10.923 15.767 10.696 15.859 10.446C15.951 10.196 15.977 9.931 15.936 9.672C15.895 9.413 15.788 9.167 15.625 8.956C15.462 8.745 15.248 8.578 15.001 8.469C14.754 8.36 14.482 8.314 14.208 8.335C13.934 8.356 13.657 8.443 13.402 8.589C13.147 8.735 12.922 8.937 12.748 9.181C12.574 9.425 12.456 9.706 12.405 10.001C12.354 10.296 12.371 10.599 12.455 10.891L12.843 11.961C12.969 12.335 13.207 12.66 13.521 12.9C13.835 14.14 14.514 15.282 15.476 16.208C16.438 17.134 17.641 17.801 18.968 18.151C20.295 18.501 21.702 18.52 23.041 18.206C24.38 17.892 25.598 17.259 26.597 16.36C27.596 15.461 28.336 14.335 28.748 13.09C29.16 11.845 29.229 10.525 28.949 9.246C28.669 7.967 28.051 6.772 27.159 5.784C26.267 4.796 25.132 4.049 23.861 3.608C22.59 3.167 21.228 3.045 19.889 3.253C18.55 3.461 17.282 3.994 16.195 4.811L15.685 5.271C15.498 5.458 15.362 5.694 15.29 5.955C15.218 6.216 15.211 6.493 15.271 6.761C15.331 7.029 15.456 7.281 15.636 7.493C15.816 7.705 16.046 7.873 16.306 7.983L16.646 8.121C17.117 8.352 17.643 8.467 18.178 8.453C18.713 8.439 19.241 8.197 19.716 7.749C20.191 7.301 20.551 6.705 20.756 6.033C20.961 5.361 21.002 4.642 20.876 3.947C20.75 3.252 20.461 2.607 20.042 2.077C19.623 1.547 19.09 1.148 18.498 0.926C17.906 0.704 17.272 0.666 16.653 0.815C16.034 0.964 15.453 1.296 14.966 1.784L14.526 2.234C14.369 2.401 14.247 2.608 14.17 2.839C14.093 3.07 14.062 3.318 14.079 3.564C14.096 3.81 14.161 4.05 14.27 4.268C14.379 4.486 14.529 4.679 14.71 4.832C14.891 4.985 15.099 5.094 15.32 5.151C15.541 5.208 15.771 5.212 15.994 5.163L16.554 5.003C17.457 4.727 18.408 4.683 19.333 4.875C20.258 5.067 21.129 5.49 21.874 6.117C22.619 6.744 23.22 7.555 23.629 8.485C24.038 9.415 24.243 10.441 24.226 11.482C24.209 12.523 23.971 13.553 23.533 14.495C23.095 15.437 22.467 16.27 21.693 16.938C20.919 17.606 20.018 18.092 19.051 18.362C18.084 18.632 17.072 18.68 16.09 18.502C15.108 18.324 14.175 17.923 13.358 17.327C12.541 16.731 11.86 15.958 11.36 15.063C10.86 14.168 10.552 13.174 10.457 12.146L10.443 12.046C10.398 11.612 10.268 11.192 10.063 10.816C9.858 10.44 9.585 10.117 9.262 9.873C8.939 9.629 8.576 9.471 8.196 9.41C7.816 9.349 7.43 9.376 7.059 9.49L6.519 9.68C5.717 9.986 5.032 10.497 4.526 11.171C4.02 11.845 3.711 12.657 3.631 13.514C3.551 14.371 3.702 15.231 4.069 16.007C4.436 16.783 5.009 17.455 5.738 17.966C6.467 18.477 7.326 18.807 8.227 18.927C9.128 19.047 10.044 18.954 10.89 18.655C11.736 18.356 12.487 17.86 13.078 17.212L13.278 16.992C13.395 16.857 13.477 16.694 13.518 16.517C13.559 16.34 13.558 16.155 13.515 15.978C13.472 15.801 13.387 15.638 13.269 15.502C13.151 15.366 12.999 15.262 12.827 15.198C12.655 15.134 12.467 15.111 12.279 15.131C12.091 15.151 11.907 15.214 11.741 15.314C11.575 15.414 11.43 15.549 11.316 15.712L10.928 16.232C10.457 16.814 10.166 17.533 10.092 18.298C10.018 19.063 10.164 19.831 10.514 20.513C10.864 21.195 11.401 21.771 12.058 22.183C12.715 22.595 13.469 22.825 14.237 22.849C15.005 22.873 15.763 22.69 16.43 22.316C17.097 21.942 17.652 21.391 18.043 20.724C18.434 20.057 18.648 19.304 18.664 18.534C18.68 17.764 18.497 17.005 18.129 16.328L17.472 14.382Z" fill="white"/>
+          </svg>
+        </span>
+        <span class="whatsapp-text">Message on WhatsApp</span>
+      </a>
     </div>
   </section>
 
@@ -1483,8 +1422,7 @@
         <ul class="footer-links">
           <li><a href="#about">About Us</a></li>
           <li><a href="#services">Services</a></li>
-          <li><a href="#trainers">Trainers</a></li>
-          <li><a href="#pricing">Pricing</a></li>
+                    <li><a href="#pricing">Pricing</a></li>
         </ul>
       </div>
       <div class="footer-col">
@@ -1666,7 +1604,7 @@
       animateCursor();
 
       // Add hover effect to interactive elements
-      document.querySelectorAll('a, button, .service-card, .trainer-card, .pricing-card, .stat-box').forEach(el => {
+      document.querySelectorAll('a, button, .service-card, .whatsapp-button, .pricing-card, .stat-box').forEach(el => {
         el.addEventListener('mouseenter', () => {
           cursor.style.transform = 'scale(2)';
           cursor.style.borderColor = '#ffaa00';
@@ -1784,16 +1722,16 @@
         ease: 'power3.out'
       });
 
-      // Trainers cards
-      gsap.from('.trainer-card', {
+      // WhatsApp button
+      gsap.from('.whatsapp-button', {
         scrollTrigger: {
-          trigger: '.trainers-grid',
+          trigger: '.whatsapp-content',
           start: 'top 85%',
           toggleActions: 'play none none reverse'
         },
         duration: 1,
         y: 30,
-        stagger: 0.15,
+        opacity: 0,
         ease: 'power3.out'
       });
 
