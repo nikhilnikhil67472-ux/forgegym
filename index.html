@@ -444,6 +444,11 @@
     section {
       padding: 120px 50px;
       position: relative;
+      background: var(--bg-dark);
+    }
+
+    .services, .pricing {
+      background: linear-gradient(180deg, var(--bg-dark) 0%, var(--bg-dark-2) 100%);
     }
 
     .section-header {
@@ -1705,16 +1710,16 @@
         delay: 0.8
       });
 
-      // Scroll animations for sections
+      // Section headers - visible by default
       gsap.utils.toArray('.section-header').forEach(header => {
         gsap.from(header, {
           scrollTrigger: {
             trigger: header,
-            start: 'top 80%',
+            start: 'top 85%',
+            toggleActions: 'play none none reverse'
           },
-          duration: 1,
-          y: 50,
-          opacity: 0,
+          duration: 0.8,
+          y: 30,
           ease: 'power3.out'
         });
       });
@@ -1755,16 +1760,16 @@
         ease: 'power3.out'
       });
 
-      // Services cards
+      // Services cards - visible by default, animate for effect
       gsap.from('.service-card', {
         scrollTrigger: {
           trigger: '.services-grid',
-          start: 'top 75%',
+          start: 'top 85%',
+          toggleActions: 'play none none reverse'
         },
         duration: 0.8,
-        y: 50,
-        opacity: 0,
-        stagger: 0.15,
+        y: 30,
+        stagger: 0.1,
         ease: 'power3.out'
       });
 
@@ -1772,12 +1777,12 @@
       gsap.from('.trainer-card', {
         scrollTrigger: {
           trigger: '.trainers-grid',
-          start: 'top 75%',
+          start: 'top 85%',
+          toggleActions: 'play none none reverse'
         },
         duration: 1,
-        y: 50,
-        opacity: 0,
-        stagger: 0.2,
+        y: 30,
+        stagger: 0.15,
         ease: 'power3.out'
       });
 
@@ -1785,12 +1790,12 @@
       gsap.from('.pricing-card', {
         scrollTrigger: {
           trigger: '.pricing-grid',
-          start: 'top 75%',
+          start: 'top 85%',
+          toggleActions: 'play none none reverse'
         },
         duration: 0.8,
-        y: 30,
-        opacity: 0,
-        stagger: 0.15,
+        y: 20,
+        stagger: 0.1,
         ease: 'power3.out'
       });
 
