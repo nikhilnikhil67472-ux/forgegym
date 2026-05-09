@@ -744,6 +744,17 @@
       overflow: hidden;
     }
 
+    .trainer-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+
+    .trainer-card:hover .trainer-image img {
+      transform: scale(1.1);
+    }
+
     .trainer-image::before {
       content: '';
       position: absolute;
@@ -1353,7 +1364,7 @@
     </div>
     <div class="trainers-grid">
       <div class="trainer-card">
-        <div class="trainer-image"></div>
+        <div class="trainer-image"><img src="https://picsum.photos/seed/marcus/400/600" alt="Marcus Chen"></div>
         <div class="trainer-info">
           <h3>Marcus Chen</h3>
           <div class="trainer-specialty">Strength & Conditioning</div>
@@ -1361,7 +1372,7 @@
         </div>
       </div>
       <div class="trainer-card">
-        <div class="trainer-image"></div>
+        <div class="trainer-image"><img src="https://picsum.photos/seed/sarah/400/600" alt="Sarah Williams"></div>
         <div class="trainer-info">
           <h3>Sarah Williams</h3>
           <div class="trainer-specialty">HIIT & Nutrition</div>
@@ -1369,7 +1380,7 @@
         </div>
       </div>
       <div class="trainer-card">
-        <div class="trainer-image"></div>
+        <div class="trainer-image"><img src="https://picsum.photos/seed/devon/400/600" alt="Devon Brooks"></div>
         <div class="trainer-info">
           <h3>Devon Brooks</h3>
           <div class="trainer-specialty">Combat & Functional</div>
