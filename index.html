@@ -6,17 +6,20 @@
   <title>IronForge Gym | Forge Your Strength</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Exo+2:wght@400;600;700;900&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/MotionPathPlugin.min.js"></script>
   <style>
     :root {
-      --bg-primary: #0a0a0a;
-      --bg-secondary: #141414;
-      --bg-card: #1a1a1a;
-      --accent-primary: #ff3c00;
-      --accent-secondary: #ff6b35;
-      --text-primary: #ffffff;
-      --text-secondary: #a0a0a0;
-      --border: #2a2a2a;
+      --bg-dark: #050505;
+      --bg-dark-2: #0a0a0a;
+      --accent-orange: #ff4d00;
+      --accent-yellow: #ffaa00;
+      --accent-red: #ff0040;
+      --text-white: #ffffff;
+      --text-gray: #888888;
     }
 
     * {
@@ -30,30 +33,100 @@
     }
 
     body {
-      font-family: 'Barlow', sans-serif;
-      background-color: var(--bg-primary);
-      color: var(--text-primary);
-      font-size: 18px;
-      line-height: 1.6;
+      font-family: 'Exo 2', sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-white);
       overflow-x: hidden;
+      cursor: none;
     }
 
-    h1, h2, h3, h4, h5, h6 {
-      font-family: 'Bebas Neue', sans-serif;
-      font-weight: 400;
-      letter-spacing: 2px;
-      text-transform: uppercase;
+    /* Custom Cursor */
+    .cursor {
+      position: fixed;
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--accent-orange);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 10000;
+      transition: transform 0.1s ease;
+      mix-blend-mode: difference;
     }
 
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 24px;
+    .cursor-dot {
+      position: fixed;
+      width: 6px;
+      height: 6px;
+      background: var(--accent-orange);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 10001;
     }
 
-    /* 3D Perspective Container */
-    .perspective-container {
-      perspective: 1000px;
+    /* Loader */
+    .loader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--bg-dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+
+    .loader-content {
+      text-align: center;
+    }
+
+    .loader-text {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 48px;
+      font-weight: 900;
+      letter-spacing: 10px;
+      background: linear-gradient(90deg, var(--accent-orange), var(--accent-yellow), var(--accent-orange));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-size: 200% 100%;
+      animation: gradientShift 2s linear infinite;
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 200% 50%; }
+    }
+
+    .loader-bar {
+      width: 300px;
+      height: 4px;
+      background: rgba(255, 77, 0, 0.2);
+      margin-top: 30px;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .loader-progress {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-orange), var(--accent-yellow));
+      animation: loadProgress 2s ease-in-out forwards;
+    }
+
+    @keyframes loadProgress {
+      0% { width: 0%; }
+      100% { width: 100%; }
+    }
+
+    /* Three.js Canvas */
+    #canvas-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
     }
 
     /* Navigation */
@@ -61,42 +134,33 @@
       position: fixed;
       top: 0;
       left: 0;
-      right: 0;
-      z-index: 1000;
-      background: rgba(10, 10, 10, 0.95);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid var(--border);
-      padding: 16px 0;
-      transition: all 0.3s ease;
-    }
-
-    .navbar.scrolled {
-      background: rgba(10, 10, 10, 0.98);
-      padding: 12px 0;
-      box-shadow: 0 4px 30px rgba(255, 60, 0, 0.1);
-    }
-
-    .navbar .container {
+      width: 100%;
+      padding: 20px 50px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      z-index: 1000;
+      background: linear-gradient(180deg, rgba(5,5,5,0.95) 0%, transparent 100%);
+      transition: all 0.5s ease;
+    }
+
+    .navbar.scrolled {
+      background: rgba(5, 5, 5, 0.98);
+      padding: 15px 50px;
+      backdrop-filter: blur(20px);
     }
 
     .logo {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 32px;
-      color: var(--text-primary);
-      text-decoration: none;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 28px;
+      font-weight: 900;
       letter-spacing: 4px;
-      transition: transform 0.3s ease;
-    }
-
-    .logo:hover {
-      transform: scale(1.05);
+      text-decoration: none;
+      color: var(--text-white);
     }
 
     .logo span {
-      color: var(--accent-primary);
+      color: var(--accent-orange);
     }
 
     .nav-links {
@@ -106,330 +170,53 @@
     }
 
     .nav-links a {
-      color: var(--text-secondary);
-      text-decoration: none;
-      font-weight: 500;
+      font-family: 'Exo 2', sans-serif;
       font-size: 14px;
-      letter-spacing: 1px;
+      font-weight: 600;
+      letter-spacing: 2px;
       text-transform: uppercase;
-      transition: color 0.3s ease;
+      color: var(--text-gray);
+      text-decoration: none;
       position: relative;
+      transition: color 0.3s ease;
     }
 
-    .nav-links a::after {
+    .nav-links a::before {
       content: '';
       position: absolute;
-      bottom: -4px;
+      bottom: -5px;
       left: 0;
       width: 0;
       height: 2px;
-      background: var(--accent-primary);
+      background: var(--accent-orange);
       transition: width 0.3s ease;
     }
 
     .nav-links a:hover {
-      color: var(--accent-primary);
+      color: var(--accent-orange);
     }
 
-    .nav-links a:hover::after {
+    .nav-links a:hover::before {
       width: 100%;
     }
 
     .nav-cta {
-      background: var(--accent-primary);
-      color: var(--text-primary);
-      padding: 12px 24px;
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 14px;
-      letter-spacing: 1px;
+      background: linear-gradient(135deg, var(--accent-orange) 0%, var(--accent-red) 100%);
+      color: var(--text-white);
+      padding: 14px 30px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 2px;
       text-transform: uppercase;
-      transition: all 0.3s ease;
+      text-decoration: none;
+      border-radius: 30px;
       position: relative;
       overflow: hidden;
+      transition: all 0.3s ease;
     }
 
     .nav-cta::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-      transition: left 0.5s ease;
-    }
-
-    .nav-cta:hover::before {
-      left: 100%;
-    }
-
-    .nav-cta:hover {
-      background: var(--accent-secondary);
-      transform: scale(1.05);
-      box-shadow: 0 0 20px rgba(255, 60, 0, 0.5);
-    }
-
-    .hamburger {
-      display: none;
-      flex-direction: column;
-      gap: 6px;
-      cursor: pointer;
-      padding: 8px;
-    }
-
-    .hamburger span {
-      width: 28px;
-      height: 3px;
-      background: var(--text-primary);
-      transition: all 0.3s ease;
-      border-radius: 2px;
-    }
-
-    .hamburger.active span:nth-child(1) {
-      transform: rotate(45deg) translate(6px, 6px);
-    }
-
-    .hamburger.active span:nth-child(2) {
-      opacity: 0;
-    }
-
-    .hamburger.active span:nth-child(3) {
-      transform: rotate(-45deg) translate(6px, -6px);
-    }
-
-    .mobile-menu {
-      display: none;
-      position: fixed;
-      top: 70px;
-      left: 0;
-      right: 0;
-      background: var(--bg-secondary);
-      padding: 24px;
-      flex-direction: column;
-      gap: 24px;
-      border-bottom: 1px solid var(--border);
-      transform: translateY(-100%);
-      opacity: 0;
-      transition: all 0.3s ease;
-    }
-
-    .mobile-menu.active {
-      transform: translateY(0);
-      opacity: 1;
-    }
-
-    .mobile-menu a {
-      color: var(--text-secondary);
-      text-decoration: none;
-      font-size: 18px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      transition: color 0.3s ease;
-    }
-
-    .mobile-menu a:hover {
-      color: var(--accent-primary);
-    }
-
-    /* Hero Section with 3D */
-    .hero {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      position: relative;
-      padding-top: 80px;
-      overflow: hidden;
-      background: var(--bg-primary);
-    }
-
-    .hero-bg {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      overflow: hidden;
-    }
-
-    .hero-bg::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background:
-        repeating-linear-gradient(
-          -45deg,
-          transparent,
-          transparent 40px,
-          rgba(255, 60, 0, 0.03) 40px,
-          rgba(255, 60, 0, 0.03) 80px
-        );
-      animation: stripeMove 20s linear infinite;
-    }
-
-    @keyframes stripeMove {
-      0% { transform: translate(0, 0); }
-      100% { transform: translate(80px, 80px); }
-    }
-
-    .hero-bg::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: radial-gradient(ellipse at 70% 50%, rgba(255, 60, 0, 0.2) 0%, transparent 60%);
-    }
-
-    /* 3D Floating Shapes */
-    .floating-shape {
-      position: absolute;
-      border: 2px solid var(--accent-primary);
-      opacity: 0.2;
-      animation: float 6s ease-in-out infinite;
-    }
-
-    .shape-1 {
-      width: 100px;
-      height: 100px;
-      top: 20%;
-      right: 10%;
-      transform: rotate(45deg);
-      animation-delay: 0s;
-    }
-
-    .shape-2 {
-      width: 60px;
-      height: 60px;
-      top: 60%;
-      right: 20%;
-      border-radius: 50%;
-      animation-delay: 1s;
-    }
-
-    .shape-3 {
-      width: 80px;
-      height: 80px;
-      top: 40%;
-      right: 5%;
-      clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
-      animation-delay: 2s;
-    }
-
-    .shape-4 {
-      width: 120px;
-      height: 120px;
-      top: 70%;
-      right: 30%;
-      transform: rotate(15deg);
-      animation-delay: 0.5s;
-    }
-
-    @keyframes float {
-      0%, 100% { transform: translateY(0) rotate(0deg); }
-      50% { transform: translateY(-20px) rotate(5deg); }
-    }
-
-    /* Particle Effect */
-    .particles {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      overflow: hidden;
-    }
-
-    .particle {
-      position: absolute;
-      width: 4px;
-      height: 4px;
-      background: var(--accent-primary);
-      border-radius: 50%;
-      opacity: 0;
-      animation: particleFloat 8s infinite;
-    }
-
-    @keyframes particleFloat {
-      0% { transform: translateY(100vh) scale(0); opacity: 0; }
-      10% { opacity: 0.8; }
-      90% { opacity: 0.8; }
-      100% { transform: translateY(-100px) scale(1); opacity: 0; }
-    }
-
-    .hero-content {
-      position: relative;
-      z-index: 1;
-      max-width: 700px;
-      transform-style: preserve-3d;
-    }
-
-    .hero h1 {
-      font-size: 96px;
-      line-height: 0.95;
-      margin-bottom: 24px;
-      transform: translateZ(0);
-      animation: textGlow 3s ease-in-out infinite;
-    }
-
-    @keyframes textGlow {
-      0%, 100% { text-shadow: 0 0 20px rgba(255, 60, 0, 0.3); }
-      50% { text-shadow: 0 0 40px rgba(255, 60, 0, 0.6), 0 0 60px rgba(255, 60, 0, 0.3); }
-    }
-
-    .hero h1 span {
-      color: var(--accent-primary);
-      display: inline-block;
-      animation: letterPulse 2s ease-in-out infinite;
-    }
-
-    @keyframes letterPulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.02); }
-    }
-
-    .hero p {
-      font-size: 20px;
-      color: var(--text-secondary);
-      margin-bottom: 40px;
-      max-width: 500px;
-      opacity: 0;
-      animation: fadeInUp 1s ease forwards 0.3s;
-    }
-
-    .hero-buttons {
-      display: flex;
-      gap: 20px;
-      flex-wrap: wrap;
-      opacity: 0;
-      animation: fadeInUp 1s ease forwards 0.6s;
-    }
-
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(30px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .btn-primary {
-      background: var(--accent-primary);
-      color: var(--text-primary);
-      padding: 18px 36px;
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 16px;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      transition: all 0.3s ease;
-      display: inline-block;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .btn-primary::before {
       content: '';
       position: absolute;
       top: 0;
@@ -440,188 +227,408 @@
       transition: left 0.5s ease;
     }
 
-    .btn-primary:hover::before {
+    .nav-cta:hover::before {
       left: 100%;
     }
 
+    .nav-cta:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 30px rgba(255, 77, 0, 0.5);
+    }
+
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+      cursor: pointer;
+    }
+
+    .hamburger span {
+      width: 30px;
+      height: 3px;
+      background: var(--text-white);
+      border-radius: 3px;
+      transition: all 0.3s ease;
+    }
+
+    /* Hero Section */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 120px 50px 80px;
+      position: relative;
+    }
+
+    .hero-content {
+      max-width: 700px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      padding: 8px 20px;
+      background: rgba(255, 77, 0, 0.1);
+      border: 1px solid var(--accent-orange);
+      border-radius: 30px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--accent-orange);
+      margin-bottom: 30px;
+    }
+
+    .hero h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 100px;
+      font-weight: 900;
+      line-height: 0.95;
+      letter-spacing: 5px;
+      margin-bottom: 30px;
+    }
+
+    .hero h1 .highlight {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--accent-orange), var(--accent-yellow));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: textGlow 2s ease-in-out infinite;
+    }
+
+    @keyframes textGlow {
+      0%, 100% { filter: drop-shadow(0 0 10px rgba(255, 77, 0, 0.5)); }
+      50% { filter: drop-shadow(0 0 30px rgba(255, 77, 0, 0.8)); }
+    }
+
+    .hero p {
+      font-size: 20px;
+      color: var(--text-gray);
+      margin-bottom: 40px;
+      max-width: 500px;
+      line-height: 1.8;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-orange), var(--accent-red));
+      color: var(--text-white);
+      padding: 20px 40px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      text-decoration: none;
+      border-radius: 50px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
     .btn-primary:hover {
-      background: var(--accent-secondary);
-      transform: scale(1.05) translateY(-3px);
-      box-shadow: 0 10px 30px rgba(255, 60, 0, 0.4);
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px rgba(255, 77, 0, 0.4);
     }
 
     .btn-outline {
-      border: 2px solid var(--text-primary);
-      color: var(--text-primary);
-      padding: 16px 34px;
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      color: var(--text-white);
+      padding: 18px 38px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
       letter-spacing: 2px;
       text-transform: uppercase;
+      text-decoration: none;
+      border-radius: 50px;
       transition: all 0.3s ease;
-      display: inline-block;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-outline::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 0;
+      height: 100%;
+      background: var(--text-white);
+      transition: width 0.3s ease;
+      z-index: -1;
     }
 
     .btn-outline:hover {
-      background: var(--text-primary);
-      color: var(--bg-primary);
-      transform: scale(1.05) translateY(-3px);
-      box-shadow: 0 10px 30px rgba(255, 255, 255, 0.2);
+      border-color: var(--text-white);
+      color: var(--bg-dark);
+    }
+
+    .btn-outline:hover::before {
+      width: 100%;
+    }
+
+    /* Floating Elements */
+    .floating-elements {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 50%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .floating-card {
+      position: absolute;
+      background: rgba(20, 20, 20, 0.8);
+      border: 1px solid rgba(255, 77, 0, 0.3);
+      border-radius: 20px;
+      padding: 20px 30px;
+      backdrop-filter: blur(10px);
+    }
+
+    .floating-card.card-1 {
+      top: 20%;
+      right: 10%;
+      animation: float1 4s ease-in-out infinite;
+    }
+
+    .floating-card.card-2 {
+      top: 50%;
+      right: 25%;
+      animation: float2 5s ease-in-out infinite;
+    }
+
+    .floating-card.card-3 {
+      top: 70%;
+      right: 5%;
+      animation: float3 6s ease-in-out infinite;
+    }
+
+    @keyframes float1 {
+      0%, 100% { transform: translateY(0) rotate(-5deg); }
+      50% { transform: translateY(-20px) rotate(5deg); }
+    }
+
+    @keyframes float2 {
+      0%, 100% { transform: translateY(0) rotate(5deg); }
+      50% { transform: translateY(-15px) rotate(-5deg); }
+    }
+
+    @keyframes float3 {
+      0%, 100% { transform: translateY(0) rotate(-3deg); }
+      50% { transform: translateY(-25px) rotate(3deg); }
+    }
+
+    .stat-mini {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--accent-orange);
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-gray);
+      text-transform: uppercase;
+      letter-spacing: 2px;
     }
 
     /* Section Styles */
     section {
-      padding: 100px 0;
+      padding: 120px 50px;
       position: relative;
     }
 
     .section-header {
       text-align: center;
-      margin-bottom: 60px;
+      margin-bottom: 80px;
     }
 
     .section-header h2 {
-      font-size: 64px;
-      margin-bottom: 16px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 60px;
+      font-weight: 900;
+      letter-spacing: 5px;
+      margin-bottom: 20px;
     }
 
     .section-header h2 span {
-      color: var(--accent-primary);
-      position: relative;
-      display: inline-block;
-    }
-
-    .section-header h2 span::after {
-      content: '';
-      position: absolute;
-      bottom: 5px;
-      left: 0;
-      width: 100%;
-      height: 8px;
-      background: var(--accent-primary);
-      opacity: 0.3;
-      transform: skewX(-20deg);
+      background: linear-gradient(135deg, var(--accent-orange), var(--accent-yellow));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
 
     .section-header p {
-      color: var(--text-secondary);
+      color: var(--text-gray);
+      font-size: 18px;
       max-width: 600px;
       margin: 0 auto;
     }
 
     /* About Section */
     .about {
-      background: var(--bg-secondary);
+      background: linear-gradient(180deg, var(--bg-dark) 0%, var(--bg-dark-2) 50%, var(--bg-dark) 100%);
     }
 
     .about-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 60px;
+      gap: 80px;
       align-items: center;
+      max-width: 1400px;
+      margin: 0 auto;
     }
 
-    .about-image {
-      background: linear-gradient(135deg, var(--bg-card) 0%, var(--border) 100%);
+    .about-visual {
+      position: relative;
       aspect-ratio: 4/3;
+    }
+
+    .about-gym {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(255, 77, 0, 0.1) 0%, transparent 50%);
+      border: 2px solid rgba(255, 77, 0, 0.3);
+      border-radius: 30px;
       display: flex;
       align-items: center;
       justify-content: center;
-      border: 1px solid var(--border);
       position: relative;
       overflow: hidden;
-      transform: perspective(500px) rotateY(-5deg);
-      transition: transform 0.5s ease;
     }
 
-    .about-image:hover {
-      transform: perspective(500px) rotateY(0deg);
+    .about-gym::before {
+      content: '';
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      border: 2px solid var(--accent-orange);
+      border-radius: 50%;
+      animation: rotateRing 20s linear infinite;
     }
 
-    .about-image::before {
+    .about-gym::after {
       content: '';
       position: absolute;
       width: 200px;
       height: 200px;
-      border: 3px solid var(--accent-primary);
-      opacity: 0.3;
-      animation: rotateBorder 10s linear infinite;
+      border: 2px solid var(--accent-yellow);
+      animation: rotateRing 15s linear infinite reverse;
     }
 
-    @keyframes rotateBorder {
+    @keyframes rotateRing {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
 
-    .about-image::after {
-      content: 'IRONFORGE';
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 24px;
-      letter-spacing: 8px;
-      color: var(--text-secondary);
+    .gym-text {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 36px;
+      font-weight: 900;
+      letter-spacing: 10px;
+      color: rgba(255, 255, 255, 0.1);
     }
 
     .about-content h3 {
-      font-size: 36px;
-      margin-bottom: 24px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 42px;
+      font-weight: 900;
+      letter-spacing: 3px;
+      margin-bottom: 30px;
     }
 
     .about-content p {
-      color: var(--text-secondary);
+      color: var(--text-gray);
+      font-size: 18px;
       margin-bottom: 40px;
+      line-height: 1.8;
     }
 
-    .stats {
+    .stats-container {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 24px;
+      gap: 20px;
     }
 
-    .stat {
+    .stat-box {
+      background: rgba(20, 20, 20, 0.8);
+      border: 1px solid rgba(255, 77, 0, 0.2);
+      border-radius: 20px;
+      padding: 30px 20px;
       text-align: center;
-      padding: 20px;
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      transform: translateZ(0);
-      transition: all 0.3s ease;
+      transition: all 0.4s ease;
+      position: relative;
+      overflow: hidden;
     }
 
-    .stat:hover {
+    .stat-box::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, var(--accent-orange), var(--accent-red));
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .stat-box:hover::before {
+      opacity: 0.1;
+    }
+
+    .stat-box:hover {
       transform: translateY(-10px);
-      border-color: var(--accent-primary);
-      box-shadow: 0 10px 30px rgba(255, 60, 0, 0.2);
+      border-color: var(--accent-orange);
+      box-shadow: 0 20px 40px rgba(255, 77, 0, 0.3);
     }
 
     .stat-number {
-      font-family: 'Bebas Neue', sans-serif;
+      font-family: 'Orbitron', sans-serif;
       font-size: 48px;
-      color: var(--accent-primary);
-      line-height: 1;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--accent-orange), var(--accent-yellow));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      position: relative;
+      z-index: 1;
     }
 
     .stat-label {
       font-size: 14px;
-      color: var(--text-secondary);
+      color: var(--text-gray);
       text-transform: uppercase;
-      letter-spacing: 1px;
+      letter-spacing: 2px;
+      margin-top: 10px;
+      position: relative;
+      z-index: 1;
     }
 
     /* Services Section */
     .services-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 24px;
+      gap: 30px;
+      max-width: 1400px;
+      margin: 0 auto;
     }
 
     .service-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      padding: 40px 32px;
+      background: linear-gradient(180deg, rgba(20, 20, 20, 0.9) 0%, rgba(10, 10, 10, 0.9) 100%);
+      border: 1px solid rgba(255, 77, 0, 0.2);
+      border-radius: 30px;
+      padding: 50px 30px;
       text-align: center;
-      transition: all 0.4s ease;
-      transform-style: preserve-3d;
+      transition: all 0.5s ease;
       position: relative;
+      overflow: hidden;
     }
 
     .service-card::before {
@@ -629,9 +636,9 @@
       position: absolute;
       top: 0;
       left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(135deg, rgba(255, 60, 0, 0.1) 0%, transparent 100%);
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(180deg, rgba(255, 77, 0, 0.1) 0%, transparent 100%);
       opacity: 0;
       transition: opacity 0.3s ease;
     }
@@ -641,85 +648,90 @@
     }
 
     .service-card:hover {
-      border-color: var(--accent-primary);
-      box-shadow: 0 20px 40px rgba(255, 60, 0, 0.3);
-      transform: translateY(-15px) rotateX(5deg);
+      transform: translateY(-20px) rotateX(5deg);
+      border-color: var(--accent-orange);
+      box-shadow: 0 30px 60px rgba(255, 77, 0, 0.3);
     }
 
     .service-icon {
-      width: 64px;
-      height: 64px;
-      margin: 0 auto 24px;
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 30px;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
-      font-size: 28px;
+      background: linear-gradient(135deg, var(--accent-orange), var(--accent-yellow));
+      border-radius: 50%;
+      font-size: 36px;
       position: relative;
       animation: iconPulse 2s ease-in-out infinite;
     }
 
     @keyframes iconPulse {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(255, 60, 0, 0.4); }
-      50% { box-shadow: 0 0 0 15px rgba(255, 60, 0, 0); }
+      0%, 100% { box-shadow: 0 0 0 0 rgba(255, 77, 0, 0.5); }
+      50% { box-shadow: 0 0 0 20px rgba(255, 77, 0, 0); }
     }
 
     .service-card h3 {
-      font-size: 24px;
-      margin-bottom: 16px;
-      transition: color 0.3s ease;
-    }
-
-    .service-card:hover h3 {
-      color: var(--accent-primary);
-    }
-
-    .service-card p {
-      color: var(--text-secondary);
-      font-size: 16px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 2px;
       margin-bottom: 20px;
     }
 
+    .service-card p {
+      color: var(--text-gray);
+      font-size: 16px;
+      margin-bottom: 25px;
+      line-height: 1.6;
+    }
+
     .service-price {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 28px;
-      color: var(--accent-primary);
+      font-family: 'Orbitron', sans-serif;
+      font-size: 32px;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--accent-orange), var(--accent-yellow));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
 
     .service-price span {
-      font-size: 14px;
-      color: var(--text-secondary);
-      font-family: 'Barlow', sans-serif;
+      font-size: 16px;
+      color: var(--text-gray);
+      font-family: 'Exo 2', sans-serif;
     }
 
     /* Trainers Section */
     .trainers {
-      background: var(--bg-secondary);
+      background: var(--bg-dark-2);
     }
 
     .trainers-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 32px;
+      gap: 40px;
+      max-width: 1400px;
+      margin: 0 auto;
     }
 
     .trainer-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(20, 20, 20, 0.9) 0%, rgba(10, 10, 10, 0.9) 100%);
+      border: 1px solid rgba(255, 77, 0, 0.2);
+      border-radius: 30px;
       overflow: hidden;
-      transition: all 0.4s ease;
-      transform-style: preserve-3d;
+      transition: all 0.5s ease;
     }
 
     .trainer-card:hover {
-      border-color: var(--accent-primary);
-      transform: translateY(-10px) rotateX(5deg);
-      box-shadow: 0 20px 40px rgba(255, 60, 0, 0.2);
+      transform: translateY(-20px) rotateX(5deg);
+      border-color: var(--accent-orange);
+      box-shadow: 0 30px 60px rgba(255, 77, 0, 0.3);
     }
 
     .trainer-image {
       aspect-ratio: 3/4;
-      background: linear-gradient(180deg, var(--bg-card) 0%, var(--border) 100%);
+      background: linear-gradient(180deg, rgba(255, 77, 0, 0.1) 0%, rgba(10, 10, 10, 0.9) 100%);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -730,204 +742,211 @@
     .trainer-image::before {
       content: '';
       position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 0;
-      height: 0;
-      background: rgba(255, 60, 0, 0.3);
-      border-radius: 50%;
-      transform: translate(-50%, -50%);
-      transition: all 0.5s ease;
+      width: 150px;
+      height: 150px;
+      background: radial-gradient(circle, var(--accent-orange) 0%, transparent 70%);
+      opacity: 0.3;
+      animation: trainerGlow 3s ease-in-out infinite;
     }
 
-    .trainer-card:hover .trainer-image::before {
-      width: 200px;
-      height: 200px;
+    @keyframes trainerGlow {
+      0%, 100% { transform: scale(1); opacity: 0.3; }
+      50% { transform: scale(1.5); opacity: 0.1; }
     }
 
     .trainer-image::after {
-      content: 'TRAINER';
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 18px;
-      letter-spacing: 4px;
-      color: var(--text-secondary);
+      font-family: 'Orbitron', sans-serif;
+      font-size: 20px;
+      letter-spacing: 5px;
+      color: rgba(255, 255, 255, 0.3);
     }
 
+    .trainer-card:nth-child(1) .trainer-image::after { content: 'MARCUS'; }
+    .trainer-card:nth-child(2) .trainer-image::after { content: 'SARAH'; }
+    .trainer-card:nth-child(3) .trainer-image::after { content: 'DEVON'; }
+
     .trainer-info {
-      padding: 24px;
+      padding: 30px;
     }
 
     .trainer-info h3 {
+      font-family: 'Orbitron', sans-serif;
       font-size: 28px;
-      margin-bottom: 8px;
-      transition: color 0.3s ease;
-    }
-
-    .trainer-card:hover .trainer-info h3 {
-      color: var(--accent-primary);
+      font-weight: 700;
+      margin-bottom: 10px;
     }
 
     .trainer-specialty {
-      color: var(--accent-primary);
+      color: var(--accent-orange);
       font-size: 14px;
+      font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 16px;
+      letter-spacing: 3px;
+      margin-bottom: 20px;
     }
 
     .trainer-info p {
-      color: var(--text-secondary);
+      color: var(--text-gray);
       font-size: 16px;
+      line-height: 1.6;
     }
 
     /* Pricing Section */
     .pricing-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 24px;
+      gap: 30px;
+      max-width: 1400px;
+      margin: 0 auto;
       align-items: start;
     }
 
     .pricing-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      padding: 40px 32px;
+      background: linear-gradient(180deg, rgba(20, 20, 20, 0.9) 0%, rgba(10, 10, 10, 0.9) 100%);
+      border: 1px solid rgba(255, 77, 0, 0.2);
+      border-radius: 30px;
+      padding: 50px 40px;
       text-align: center;
-      transition: all 0.4s ease;
-      transform-style: preserve-3d;
+      transition: all 0.5s ease;
     }
 
     .pricing-card.featured {
-      border-color: var(--accent-primary);
-      transform: scale(1.05) translateZ(20px);
+      border-color: var(--accent-orange);
+      transform: scale(1.05);
       position: relative;
+      background: linear-gradient(180deg, rgba(255, 77, 0, 0.1) 0%, rgba(10, 10, 10, 0.9) 100%);
     }
 
     .pricing-card.featured::before {
       content: 'RECOMMENDED';
       position: absolute;
-      top: -12px;
+      top: -15px;
       left: 50%;
       transform: translateX(-50%);
-      background: var(--accent-primary);
-      padding: 6px 20px;
+      background: linear-gradient(135deg, var(--accent-orange), var(--accent-red));
+      padding: 10px 25px;
+      font-family: 'Orbitron', sans-serif;
       font-size: 12px;
-      font-weight: 600;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      animation: pulse 2s ease-in-out infinite;
+      font-weight: 700;
+      letter-spacing: 2px;
+      border-radius: 30px;
+      animation: badgePulse 2s ease-in-out infinite;
     }
 
-    @keyframes pulse {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(255, 60, 0, 0.4); }
-      50% { box-shadow: 0 0 0 10px rgba(255, 60, 0, 0); }
-    }
-
-    .pricing-card:hover {
-      border-color: var(--accent-primary);
-      transform: translateY(-10px) rotateX(5deg);
+    @keyframes badgePulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(255, 77, 0, 0.5); }
+      50% { box-shadow: 0 0 0 15px rgba(255, 77, 0, 0); }
     }
 
     .pricing-card:hover:not(.featured) {
-      transform: scale(1.02) translateY(-10px) rotateX(5deg);
+      transform: translateY(-10px);
+      border-color: var(--accent-orange);
     }
 
     .pricing-card h3 {
-      font-size: 32px;
-      margin-bottom: 8px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      margin-bottom: 10px;
     }
 
     .pricing-card .price {
-      font-family: 'Bebas Neue', sans-serif;
+      font-family: 'Orbitron', sans-serif;
       font-size: 56px;
-      color: var(--accent-primary);
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--accent-orange), var(--accent-yellow));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
       line-height: 1;
     }
 
     .pricing-card .price span {
       font-size: 18px;
-      color: var(--text-secondary);
-      font-family: 'Barlow', sans-serif;
+      color: var(--text-gray);
+      font-family: 'Exo 2', sans-serif;
     }
 
     .pricing-features {
       list-style: none;
-      margin: 32px 0;
+      margin: 40px 0;
       text-align: left;
     }
 
     .pricing-features li {
-      padding: 12px 0;
-      border-bottom: 1px solid var(--border);
-      color: var(--text-secondary);
+      padding: 15px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-gray);
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 15px;
       transition: all 0.3s ease;
     }
 
     .pricing-features li:hover {
       padding-left: 10px;
-      color: var(--text-primary);
+      color: var(--text-white);
     }
 
     .pricing-features li::before {
       content: '✓';
-      color: var(--accent-primary);
+      color: var(--accent-orange);
       font-weight: bold;
-    }
-
-    .pricing-card .btn-primary,
-    .pricing-card .btn-outline {
-      width: 100%;
-      display: block;
+      font-size: 18px;
     }
 
     /* Contact Section */
     .contact {
-      background: var(--bg-secondary);
+      background: var(--bg-dark-2);
     }
 
     .contact-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 60px;
+      gap: 80px;
+      max-width: 1400px;
+      margin: 0 auto;
     }
 
     .contact-info h3 {
-      font-size: 36px;
-      margin-bottom: 24px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 42px;
+      font-weight: 900;
+      letter-spacing: 3px;
+      margin-bottom: 30px;
     }
 
-    .contact-info p {
-      color: var(--text-secondary);
-      margin-bottom: 32px;
+    .contact-info > p {
+      color: var(--text-gray);
+      font-size: 18px;
+      margin-bottom: 40px;
+      line-height: 1.8;
     }
 
     .contact-details {
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 25px;
     }
 
     .contact-item {
       display: flex;
       align-items: center;
-      gap: 16px;
-      color: var(--text-secondary);
+      gap: 20px;
+      color: var(--text-gray);
+      padding: 20px;
+      background: rgba(20, 20, 20, 0.5);
+      border-radius: 15px;
       transition: all 0.3s ease;
-      padding: 10px;
-      border-radius: 8px;
     }
 
     .contact-item:hover {
-      background: var(--bg-card);
+      background: rgba(255, 77, 0, 0.1);
       transform: translateX(10px);
     }
 
     .contact-item span {
-      color: var(--accent-primary);
-      font-size: 20px;
+      font-size: 24px;
     }
 
     .contact-form {
@@ -938,20 +957,21 @@
 
     .contact-form input,
     .contact-form textarea {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      padding: 16px 20px;
-      color: var(--text-primary);
-      font-family: 'Barlow', sans-serif;
+      background: rgba(20, 20, 20, 0.8);
+      border: 1px solid rgba(255, 77, 0, 0.2);
+      padding: 20px 25px;
+      color: var(--text-white);
+      font-family: 'Exo 2', sans-serif;
       font-size: 16px;
+      border-radius: 15px;
       transition: all 0.3s ease;
     }
 
     .contact-form input:focus,
     .contact-form textarea:focus {
       outline: none;
-      border-color: var(--accent-primary);
-      box-shadow: 0 0 20px rgba(255, 60, 0, 0.2);
+      border-color: var(--accent-orange);
+      box-shadow: 0 0 30px rgba(255, 77, 0, 0.2);
     }
 
     .contact-form textarea {
@@ -959,67 +979,50 @@
       resize: vertical;
     }
 
-    .map-placeholder {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      aspect-ratio: 16/9;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-top: 40px;
-      transition: all 0.3s ease;
-    }
-
-    .map-placeholder:hover {
-      border-color: var(--accent-primary);
-      box-shadow: 0 0 30px rgba(255, 60, 0, 0.2);
-    }
-
-    .map-placeholder::after {
-      content: 'Map';
-      color: var(--text-secondary);
-    }
-
     /* Footer */
     .footer {
-      background: var(--bg-primary);
-      padding: 60px 0 30px;
-      border-top: 1px solid var(--border);
+      background: var(--bg-dark);
+      padding: 80px 50px 30px;
+      border-top: 1px solid rgba(255, 77, 0, 0.2);
     }
 
     .footer-grid {
       display: grid;
       grid-template-columns: 2fr 1fr 1fr 1fr;
-      gap: 40px;
-      margin-bottom: 40px;
+      gap: 60px;
+      max-width: 1400px;
+      margin: 0 auto 60px;
     }
 
     .footer-brand .logo {
-      margin-bottom: 20px;
+      margin-bottom: 25px;
       display: inline-block;
     }
 
     .footer-brand p {
-      color: var(--text-secondary);
+      color: var(--text-gray);
       font-size: 16px;
       max-width: 300px;
+      line-height: 1.8;
     }
 
     .footer h4 {
+      font-family: 'Orbitron', sans-serif;
       font-size: 18px;
-      margin-bottom: 20px;
-      color: var(--text-primary);
+      font-weight: 700;
+      letter-spacing: 2px;
+      margin-bottom: 25px;
       position: relative;
     }
 
     .footer h4::after {
       content: '';
       position: absolute;
-      bottom: -8px;
+      bottom: -10px;
       left: 0;
-      width: 40px;
-      height: 2px;
-      background: var(--accent-primary);
+      width: 50px;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent-orange), var(--accent-yellow));
     }
 
     .footer-links {
@@ -1027,49 +1030,38 @@
     }
 
     .footer-links li {
-      margin-bottom: 12px;
+      margin-bottom: 15px;
     }
 
     .footer-links a {
-      color: var(--text-secondary);
+      color: var(--text-gray);
       text-decoration: none;
+      font-size: 15px;
       transition: all 0.3s ease;
-      position: relative;
-    }
-
-    .footer-links a::before {
-      content: '→';
-      position: absolute;
-      left: -20px;
-      opacity: 0;
-      transition: all 0.3s ease;
-      color: var(--accent-primary);
+      display: inline-block;
     }
 
     .footer-links a:hover {
-      color: var(--accent-primary);
-      padding-left: 20px;
-    }
-
-    .footer-links a:hover::before {
-      opacity: 1;
-      left: 0;
+      color: var(--accent-orange);
+      transform: translateX(10px);
     }
 
     .social-links {
       display: flex;
-      gap: 16px;
+      gap: 15px;
     }
 
     .social-links a {
-      width: 44px;
-      height: 44px;
-      background: var(--bg-card);
-      border: 1px solid var(--border);
+      width: 50px;
+      height: 50px;
+      background: rgba(20, 20, 20, 0.8);
+      border: 1px solid rgba(255, 77, 0, 0.2);
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: var(--text-secondary);
+      color: var(--text-gray);
+      font-size: 18px;
       text-decoration: none;
       transition: all 0.3s ease;
       position: relative;
@@ -1083,7 +1075,7 @@
       left: -100%;
       width: 100%;
       height: 100%;
-      background: var(--accent-primary);
+      background: var(--accent-orange);
       transition: left 0.3s ease;
       z-index: 0;
     }
@@ -1093,132 +1085,112 @@
     }
 
     .social-links a:hover {
-      border-color: var(--accent-primary);
-      color: var(--text-primary);
+      border-color: var(--accent-orange);
+      color: var(--text-white);
     }
 
     .footer-bottom {
       text-align: center;
       padding-top: 30px;
-      border-top: 1px solid var(--border);
-      color: var(--text-secondary);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-gray);
       font-size: 14px;
     }
 
-    /* Scroll Animations */
-    .fade-in {
-      opacity: 0;
-      transform: translateY(50px) rotateX(-10deg);
-      transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-
-    .fade-in.visible {
-      opacity: 1;
-      transform: translateY(0) rotateX(0);
-    }
-
-    /* Stagger animations */
-    .stagger-1 { transition-delay: 0.1s; }
-    .stagger-2 { transition-delay: 0.2s; }
-    .stagger-3 { transition-delay: 0.3s; }
-    .stagger-4 { transition-delay: 0.4s; }
-
-    /* Glowing cursor effect */
-    .glow-cursor {
+    /* Mobile Menu */
+    .mobile-menu {
+      display: none;
       position: fixed;
-      width: 20px;
-      height: 20px;
-      background: var(--accent-primary);
-      border-radius: 50%;
-      pointer-events: none;
-      opacity: 0.5;
-      z-index: 9999;
-      mix-blend-mode: screen;
-      transition: transform 0.1s ease;
+      top: 80px;
+      left: 0;
+      width: 100%;
+      background: rgba(5, 5, 5, 0.98);
+      padding: 30px;
+      flex-direction: column;
+      gap: 25px;
+      z-index: 999;
+      border-bottom: 1px solid rgba(255, 77, 0, 0.2);
+    }
+
+    .mobile-menu.active {
+      display: flex;
+    }
+
+    .mobile-menu a {
+      color: var(--text-gray);
+      font-size: 20px;
+      text-decoration: none;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      transition: color 0.3s ease;
+    }
+
+    .mobile-menu a:hover {
+      color: var(--accent-orange);
     }
 
     /* Responsive */
-    @media (max-width: 1024px) {
+    @media (max-width: 1200px) {
       .services-grid {
         grid-template-columns: repeat(2, 1fr);
       }
-
       .trainers-grid {
         grid-template-columns: repeat(2, 1fr);
       }
+    }
 
+    @media (max-width: 1024px) {
+      .navbar {
+        padding: 20px 30px;
+      }
+      .nav-links, .nav-cta {
+        display: none;
+      }
+      .hamburger {
+        display: flex;
+      }
+      .hero h1 {
+        font-size: 60px;
+      }
+      .floating-elements {
+        display: none;
+      }
+      .about-grid, .contact-grid {
+        grid-template-columns: 1fr;
+        gap: 50px;
+      }
       .footer-grid {
         grid-template-columns: repeat(2, 1fr);
-      }
-
-      .floating-shape {
-        display: none;
       }
     }
 
     @media (max-width: 768px) {
-      .nav-links, .nav-cta {
-        display: none;
-      }
-
-      .hamburger {
-        display: flex;
-      }
-
-      .hero h1 {
-        font-size: 48px;
-      }
-
-      .hero p {
-        font-size: 18px;
-      }
-
       section {
-        padding: 60px 0;
+        padding: 80px 20px;
       }
-
+      .hero h1 {
+        font-size: 42px;
+      }
       .section-header h2 {
         font-size: 36px;
       }
-
-      .about-grid,
-      .contact-grid {
-        grid-template-columns: 1fr;
-        gap: 40px;
-      }
-
-      .about-image {
-        transform: none;
-      }
-
-      .stats {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .services-grid,
-      .trainers-grid,
-      .pricing-grid {
+      .services-grid, .trainers-grid, .pricing-grid {
         grid-template-columns: 1fr;
       }
-
       .pricing-card.featured {
         transform: none;
       }
-
+      .stats-container {
+        grid-template-columns: repeat(2, 1fr);
+      }
       .footer-grid {
         grid-template-columns: 1fr;
         text-align: center;
       }
-
-      .footer-brand p {
-        max-width: none;
-      }
-
       .footer h4::after {
         left: 50%;
         transform: translateX(-50%);
       }
-
       .social-links {
         justify-content: center;
       }
@@ -1226,26 +1198,38 @@
   </style>
 </head>
 <body>
-  <!-- Glowing Cursor -->
-  <div class="glow-cursor" id="glowCursor"></div>
+  <!-- Loader -->
+  <div class="loader" id="loader">
+    <div class="loader-content">
+      <div class="loader-text">IRONFORGE</div>
+      <div class="loader-bar">
+        <div class="loader-progress"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Cursor -->
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-dot" id="cursorDot"></div>
+
+  <!-- Three.js Canvas -->
+  <div id="canvas-container"></div>
 
   <!-- Navigation -->
   <nav class="navbar" id="navbar">
-    <div class="container">
-      <a href="#" class="logo">IRON<span>FORGE</span></a>
-      <ul class="nav-links">
-        <li><a href="#about">About</a></li>
-        <li><a href="#services">Services</a></li>
-        <li><a href="#trainers">Trainers</a></li>
-        <li><a href="#pricing">Pricing</a></li>
-        <li><a href="#contact">Contact</a></li>
-      </ul>
-      <a href="#pricing" class="nav-cta">Join Now</a>
-      <div class="hamburger" id="hamburger" onclick="toggleMenu()">
-        <span></span>
-        <span></span>
-        <span></span>
-      </div>
+    <a href="#" class="logo">IRON<span>FORGE</span></a>
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#services">Services</a></li>
+      <li><a href="#trainers">Trainers</a></li>
+      <li><a href="#pricing">Pricing</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <a href="#pricing" class="nav-cta">Join Now</a>
+    <div class="hamburger" onclick="toggleMenu()">
+      <span></span>
+      <span></span>
+      <span></span>
     </div>
   </nav>
 
@@ -1255,56 +1239,67 @@
     <a href="#trainers" onclick="toggleMenu()">Trainers</a>
     <a href="#pricing" onclick="toggleMenu()">Pricing</a>
     <a href="#contact" onclick="toggleMenu()">Contact</a>
-    <a href="#pricing" class="btn-primary" onclick="toggleMenu()">Join Now</a>
   </div>
 
   <!-- Hero Section -->
   <section class="hero">
-    <div class="hero-bg">
-      <div class="floating-shape shape-1"></div>
-      <div class="floating-shape shape-2"></div>
-      <div class="floating-shape shape-3"></div>
-      <div class="floating-shape shape-4"></div>
-      <div class="particles" id="particles"></div>
+    <div class="hero-content">
+      <div class="hero-badge">Transform Your Body</div>
+      <h1>FORGE YOUR <span class="highlight">STRENGTH</span></h1>
+      <p>Transform your body. Conquer your goals. Join the elite community of athletes who refuse to settle for ordinary.</p>
+      <div class="hero-buttons">
+        <a href="#pricing" class="btn-primary">Start Free Trial</a>
+        <a href="#services" class="btn-outline">View Classes</a>
+      </div>
     </div>
-    <div class="container">
-      <div class="hero-content">
-        <h1>FORGE YOUR <span>STRENGTH</span></h1>
-        <p>Transform your body. Conquer your goals. Join the elite community of athletes who refuse to settle for ordinary.</p>
-        <div class="hero-buttons">
-          <a href="#pricing" class="btn-primary">Start Free Trial</a>
-          <a href="#services" class="btn-outline">View Classes</a>
-        </div>
+    <div class="floating-elements">
+      <div class="floating-card card-1">
+        <div class="stat-mini">500+</div>
+        <div class="stat-label">Active Members</div>
+      </div>
+      <div class="floating-card card-2">
+        <div class="stat-mini">50+</div>
+        <div class="stat-label">Expert Trainers</div>
+      </div>
+      <div class="floating-card card-3">
+        <div class="stat-mini">24/7</div>
+        <div class="stat-label">Access</div>
       </div>
     </div>
   </section>
 
   <!-- About Section -->
   <section class="about" id="about">
-    <div class="container">
-      <div class="about-grid">
-        <div class="about-image fade-in"></div>
-        <div class="about-content fade-in">
-          <h3>Building Champions Since 2014</h3>
-          <p>IronForge Gym was founded on a simple principle: results speak louder than words. We've helped thousands of members transform their bodies, minds, and lives through relentless dedication and expert guidance.</p>
-          <p>Our state-of-the-art facility features premium equipment, world-class trainers, and an environment that pushes you to be your best. Every rep, every set, every milestone — we're here to celebrate it with you.</p>
-          <div class="stats">
-            <div class="stat fade-in stagger-1">
-              <div class="stat-number">10+</div>
-              <div class="stat-label">Years</div>
-            </div>
-            <div class="stat fade-in stagger-2">
-              <div class="stat-number">500+</div>
-              <div class="stat-label">Members</div>
-            </div>
-            <div class="stat fade-in stagger-3">
-              <div class="stat-number">50+</div>
-              <div class="stat-label">Trainers</div>
-            </div>
-            <div class="stat fade-in stagger-4">
-              <div class="stat-number">24/7</div>
-              <div class="stat-label">Access</div>
-            </div>
+    <div class="section-header">
+      <h2>ABOUT <span>US</span></h2>
+      <p>Building champions since 2014 with state-of-the-art facilities and expert guidance.</p>
+    </div>
+    <div class="about-grid">
+      <div class="about-visual">
+        <div class="about-gym">
+          <div class="gym-text">FORGE</div>
+        </div>
+      </div>
+      <div class="about-content">
+        <h3>Building Champions Since 2014</h3>
+        <p>IronForge Gym was founded on a simple principle: results speak louder than words. We've helped thousands of members transform their bodies, minds, and lives through relentless dedication and expert guidance.</p>
+        <p>Our state-of-the-art facility features premium equipment, world-class trainers, and an environment that pushes you to be your best.</p>
+        <div class="stats-container">
+          <div class="stat-box">
+            <div class="stat-number">10+</div>
+            <div class="stat-label">Years</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-number">500+</div>
+            <div class="stat-label">Members</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-number">50+</div>
+            <div class="stat-label">Trainers</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-number">24/7</div>
+            <div class="stat-label">Access</div>
           </div>
         </div>
       </div>
@@ -1313,71 +1308,67 @@
 
   <!-- Services Section -->
   <section class="services" id="services">
-    <div class="container">
-      <div class="section-header fade-in">
-        <h2>OUR <span>SERVICES</span></h2>
-        <p>Everything you need to achieve your fitness goals under one roof.</p>
+    <div class="section-header">
+      <h2>OUR <span>SERVICES</span></h2>
+      <p>Everything you need to achieve your fitness goals under one roof.</p>
+    </div>
+    <div class="services-grid">
+      <div class="service-card">
+        <div class="service-icon">🏋️</div>
+        <h3>Strength Training</h3>
+        <p>Build muscle and power with our extensive free weights and machine area.</p>
+        <div class="service-price">$49<span>/month</span></div>
       </div>
-      <div class="services-grid">
-        <div class="service-card fade-in stagger-1">
-          <div class="service-icon">🏋️</div>
-          <h3>Strength Training</h3>
-          <p>Build muscle and power with our extensive free weights and machine area.</p>
-          <div class="service-price">$49<span>/month</span></div>
-        </div>
-        <div class="service-card fade-in stagger-2">
-          <div class="service-icon">❤️</div>
-          <h3>Cardio Zone</h3>
-          <p>Elevate your heart rate with top-tier cardio equipment and immersive screens.</p>
-          <div class="service-price">$39<span>/month</span></div>
-        </div>
-        <div class="service-card fade-in stagger-3">
-          <div class="service-icon">👤</div>
-          <h3>Personal Training</h3>
-          <p>One-on-one coaching tailored to your unique goals and fitness level.</p>
-          <div class="service-price">$89<span>/month</span></div>
-        </div>
-        <div class="service-card fade-in stagger-4">
-          <div class="service-icon">👥</div>
-          <h3>Group Classes</h3>
-          <p>High-energy classes including HIIT, boxing, yoga, and more.</p>
-          <div class="service-price">$59<span>/month</span></div>
-        </div>
+      <div class="service-card">
+        <div class="service-icon">❤️</div>
+        <h3>Cardio Zone</h3>
+        <p>Elevate your heart rate with top-tier cardio equipment and immersive screens.</p>
+        <div class="service-price">$39<span>/month</span></div>
+      </div>
+      <div class="service-card">
+        <div class="service-icon">👤</div>
+        <h3>Personal Training</h3>
+        <p>One-on-one coaching tailored to your unique goals and fitness level.</p>
+        <div class="service-price">$89<span>/month</span></div>
+      </div>
+      <div class="service-card">
+        <div class="service-icon">👥</div>
+        <h3>Group Classes</h3>
+        <p>High-energy classes including HIIT, boxing, yoga, and more.</p>
+        <div class="service-price">$59<span>/month</span></div>
       </div>
     </div>
   </section>
 
   <!-- Trainers Section -->
   <section class="trainers" id="trainers">
-    <div class="container">
-      <div class="section-header fade-in">
-        <h2>MEET OUR <span>TRAINERS</span></h2>
-        <p>Expert guidance from certified professionals who live for fitness.</p>
+    <div class="section-header">
+      <h2>MEET OUR <span>TRAINERS</span></h2>
+      <p>Expert guidance from certified professionals who live for fitness.</p>
+    </div>
+    <div class="trainers-grid">
+      <div class="trainer-card">
+        <div class="trainer-image"></div>
+        <div class="trainer-info">
+          <h3>Marcus Chen</h3>
+          <div class="trainer-specialty">Strength & Conditioning</div>
+          <p>Former collegiate athlete with 12 years of coaching experience specializing in power and explosiveness.</p>
+        </div>
       </div>
-      <div class="trainers-grid">
-        <div class="trainer-card fade-in stagger-1">
-          <div class="trainer-image"></div>
-          <div class="trainer-info">
-            <h3>Marcus Chen</h3>
-            <div class="trainer-specialty">Strength & Conditioning</div>
-            <p>Former collegiate athlete with 12 years of coaching experience specializing in power and explosiveness.</p>
-          </div>
+      <div class="trainer-card">
+        <div class="trainer-image"></div>
+        <div class="trainer-info">
+          <h3>Sarah Williams</h3>
+          <div class="trainer-specialty">HIIT & Nutrition</div>
+          <p>Certified nutrition coach helping clients achieve sustainable results through balanced training and diet.</p>
         </div>
-        <div class="trainer-card fade-in stagger-2">
-          <div class="trainer-image"></div>
-          <div class="trainer-info">
-            <h3>Sarah Williams</h3>
-            <div class="trainer-specialty">HIIT & Nutrition</div>
-            <p>Certified nutrition coach helping clients achieve sustainable results through balanced training and diet.</p>
-          </div>
-        </div>
-        <div class="trainer-card fade-in stagger-3">
-          <div class="trainer-image"></div>
-          <div class="trainer-info">
-            <h3>Devon Brooks</h3>
-            <div class="trainer-specialty">Combat & Functional</div>
-            <p>Professional MMA fighter bringing high-intensity combat sports training to the gym floor.</p>
-          </div>
+      </div>
+      <div class="trainer-card">
+        <div class="trainer-image"></div>
+        <div class="trainer-info">
+          <h3>Devon Brooks</h3>
+          <div class="trainer-specialty">Combat & Functional</div>
+          <p>Professional MMA fighter bringing high-intensity combat sports training to the gym floor.</p>
         </div>
       </div>
     </div>
@@ -1385,136 +1376,471 @@
 
   <!-- Pricing Section -->
   <section class="pricing" id="pricing">
-    <div class="container">
-      <div class="section-header fade-in">
-        <h2>MEMBERSHIP <span>PLANS</span></h2>
-        <p>Choose the plan that fits your goals and budget.</p>
+    <div class="section-header">
+      <h2>MEMBERSHIP <span>PLANS</span></h2>
+      <p>Choose the plan that fits your goals and budget.</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <h3>Basic</h3>
+        <div class="price">$49<span>/mo</span></div>
+        <ul class="pricing-features">
+          <li>Full gym access</li>
+          <li>Free locker usage</li>
+          <li>Basic equipment tour</li>
+          <li>1 free assessment</li>
+        </ul>
+        <a href="#" class="btn-outline">Get Started</a>
       </div>
-      <div class="pricing-grid">
-        <div class="pricing-card fade-in stagger-1">
-          <h3>Basic</h3>
-          <div class="price">$49<span>/mo</span></div>
-          <ul class="pricing-features">
-            <li>Full gym access</li>
-            <li>Free locker usage</li>
-            <li>Basic equipment tour</li>
-            <li>1 free assessment</li>
-          </ul>
-          <a href="#" class="btn-outline">Get Started</a>
-        </div>
-        <div class="pricing-card featured fade-in stagger-2">
-          <h3>Pro</h3>
-          <div class="price">$79<span>/mo</span></div>
-          <ul class="pricing-features">
-            <li>Everything in Basic</li>
-            <li>Unlimited group classes</li>
-            <li>1 personal training session/mo</li>
-            <li>Nutrition guide</li>
-            <li>Sauna access</li>
-          </ul>
-          <a href="#" class="btn-primary">Get Started</a>
-        </div>
-        <div class="pricing-card fade-in stagger-3">
-          <h3>Elite</h3>
-          <div class="price">$129<span>/mo</span></div>
-          <ul class="pricing-features">
-            <li>Everything in Pro</li>
-            <li>8 personal training sessions/mo</li>
-            <li>Custom meal planning</li>
-            <li>Priority booking</li>
-            <li>Guest passes (2/month)</li>
-          </ul>
-          <a href="#" class="btn-outline">Get Started</a>
-        </div>
+      <div class="pricing-card featured">
+        <h3>Pro</h3>
+        <div class="price">$79<span>/mo</span></div>
+        <ul class="pricing-features">
+          <li>Everything in Basic</li>
+          <li>Unlimited group classes</li>
+          <li>1 personal training session/mo</li>
+          <li>Nutrition guide</li>
+          <li>Sauna access</li>
+        </ul>
+        <a href="#" class="btn-primary">Get Started</a>
+      </div>
+      <div class="pricing-card">
+        <h3>Elite</h3>
+        <div class="price">$129<span>/mo</span></div>
+        <ul class="pricing-features">
+          <li>Everything in Pro</li>
+          <li>8 personal training sessions/mo</li>
+          <li>Custom meal planning</li>
+          <li>Priority booking</li>
+          <li>Guest passes (2/month)</li>
+        </ul>
+        <a href="#" class="btn-outline">Get Started</a>
       </div>
     </div>
   </section>
 
   <!-- Contact Section -->
   <section class="contact" id="contact">
-    <div class="container">
-      <div class="section-header fade-in">
-        <h2>GET IN <span>TOUCH</span></h2>
-        <p>Ready to start your transformation? Contact us today.</p>
-      </div>
-      <div class="contact-grid">
-        <div class="contact-info fade-in">
-          <h3>Let's Talk</h3>
-          <p>Have questions about our programs or facility? Reach out and our team will get back to you within 24 hours.</p>
-          <div class="contact-details">
-            <div class="contact-item">
-              <span>📍</span>
-              <p>1234 Iron Forge Road, Fitness City, FC 12345</p>
-            </div>
-            <div class="contact-item">
-              <span>📞</span>
-              <p>(555) 123-4567</p>
-            </div>
-            <div class="contact-item">
-              <span>✉️</span>
-              <p>info@ironforgegym.com</p>
-            </div>
+    <div class="section-header">
+      <h2>GET IN <span>TOUCH</span></h2>
+      <p>Ready to start your transformation? Contact us today.</p>
+    </div>
+    <div class="contact-grid">
+      <div class="contact-info">
+        <h3>Let's Talk</h3>
+        <p>Have questions about our programs or facility? Reach out and our team will get back to you within 24 hours.</p>
+        <div class="contact-details">
+          <div class="contact-item">
+            <span>📍</span>
+            <p>1234 Iron Forge Road, Fitness City, FC 12345</p>
+          </div>
+          <div class="contact-item">
+            <span>📞</span>
+            <p>(555) 123-4567</p>
+          </div>
+          <div class="contact-item">
+            <span>✉️</span>
+            <p>info@ironforgegym.com</p>
           </div>
         </div>
-        <div class="contact-form-wrapper fade-in">
-          <form class="contact-form" onsubmit="submitForm(event)">
-            <input type="text" placeholder="Your Name" required>
-            <input type="email" placeholder="Your Email" required>
-            <textarea placeholder="Your Message" required></textarea>
-            <button type="submit" class="btn-primary">Send Message</button>
-          </form>
-        </div>
+      </div>
+      <div class="contact-form-wrapper">
+        <form class="contact-form" onsubmit="submitForm(event)">
+          <input type="text" placeholder="Your Name" required>
+          <input type="email" placeholder="Your Email" required>
+          <textarea placeholder="Your Message" required></textarea>
+          <button type="submit" class="btn-primary">Send Message</button>
+        </form>
       </div>
     </div>
   </section>
 
   <!-- Footer -->
   <footer class="footer">
-    <div class="container">
-      <div class="footer-grid">
-        <div class="footer-brand">
-          <a href="#" class="logo">IRON<span>FORGE</span></a>
-          <p>Forging strength, building character. Join the IronForge family and become the best version of yourself.</p>
-        </div>
-        <div class="footer-col">
-          <h4>Quick Links</h4>
-          <ul class="footer-links">
-            <li><a href="#about">About Us</a></li>
-            <li><a href="#services">Services</a></li>
-            <li><a href="#trainers">Trainers</a></li>
-            <li><a href="#pricing">Pricing</a></li>
-          </ul>
-        </div>
-        <div class="footer-col">
-          <h4>Support</h4>
-          <ul class="footer-links">
-            <li><a href="#">FAQ</a></li>
-            <li><a href="#">Terms of Service</a></li>
-            <li><a href="#">Privacy Policy</a></li>
-            <li><a href="#">Contact Us</a></li>
-          </ul>
-        </div>
-        <div class="footer-col">
-          <h4>Follow Us</h4>
-          <div class="social-links">
-            <a href="#">f</a>
-            <a href="#">in</a>
-            <a href="#">ig</a>
-            <a href="#">yt</a>
-          </div>
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="#" class="logo">IRON<span>FORGE</span></a>
+        <p>Forging strength, building character. Join the IronForge family and become the best version of yourself.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Quick Links</h4>
+        <ul class="footer-links">
+          <li><a href="#about">About Us</a></li>
+          <li><a href="#services">Services</a></li>
+          <li><a href="#trainers">Trainers</a></li>
+          <li><a href="#pricing">Pricing</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Support</h4>
+        <ul class="footer-links">
+          <li><a href="#">FAQ</a></li>
+          <li><a href="#">Terms of Service</a></li>
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Contact Us</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Follow Us</h4>
+        <div class="social-links">
+          <a href="#">f</a>
+          <a href="#">in</a>
+          <a href="#">ig</a>
+          <a href="#">yt</a>
         </div>
       </div>
-      <div class="footer-bottom">
-        <p>&copy; 2026 IronForge Gym. All rights reserved.</p>
-      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 IronForge Gym. All rights reserved.</p>
     </div>
   </footer>
 
   <script>
-    // Mobile Menu Toggle
+    // Register GSAP plugins
+    gsap.registerPlugin(ScrollTrigger, MotionPathPlugin);
+
+    // Loader
+    window.addEventListener('load', () => {
+      gsap.to('#loader', {
+        duration: 0.5,
+        y: '-100%',
+        ease: 'power2.inOut',
+        delay: 2,
+        onComplete: () => {
+          document.getElementById('loader').style.display = 'none';
+          initAnimations();
+        }
+      });
+    });
+
+    // Three.js Scene
+    let scene, camera, renderer, particles, particleGeometry, particleMaterial;
+    let mouseX = 0, mouseY = 0;
+
+    function initThreeJS() {
+      const container = document.getElementById('canvas-container');
+      scene = new THREE.Scene();
+      camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.z = 50;
+
+      renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(window.devicePixelRatio);
+      container.appendChild(renderer.domElement);
+
+      // Create particles
+      const particleCount = 1500;
+      particleGeometry = new THREE.BufferGeometry();
+      const positions = new Float32Array(particleCount * 3);
+      const colors = new Float32Array(particleCount * 3);
+
+      for (let i = 0; i < particleCount * 3; i += 3) {
+        positions[i] = (Math.random() - 0.5) * 100;
+        positions[i + 1] = (Math.random() - 0.5) * 100;
+        positions[i + 2] = (Math.random() - 0.5) * 50;
+
+        colors[i] = Math.random() > 0.5 ? 1 : 0.3;
+        colors[i + 1] = Math.random() > 0.5 ? 0.3 : 0.2;
+        colors[i + 2] = 0;
+      }
+
+      particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      particleGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+      particleMaterial = new THREE.PointsMaterial({
+        size: 0.5,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.8,
+        blending: THREE.AdditiveBlending
+      });
+
+      particles = new THREE.Points(particleGeometry, particleMaterial);
+      scene.add(particles);
+
+      // Add floating geometric shapes
+      const shapes = [];
+      const shapeGeometries = [
+        new THREE.TorusGeometry(2, 0.5, 16, 100),
+        new THREE.IcosahedronGeometry(2, 0),
+        new THREE.OctahedronGeometry(2, 0)
+      ];
+
+      for (let i = 0; i < 5; i++) {
+        const material = new THREE.MeshBasicMaterial({
+          color: 0xff4d00,
+          wireframe: true,
+          transparent: true,
+          opacity: 0.3
+        });
+        const mesh = new THREE.Mesh(shapeGeometries[i % 3], material);
+        mesh.position.set(
+          (Math.random() - 0.5) * 80,
+          (Math.random() - 0.5) * 60,
+          (Math.random() - 0.5) * 30
+        );
+        mesh.userData = {
+          rotationSpeed: (Math.random() * 0.02 + 0.01) * (Math.random() > 0.5 ? 1 : -1),
+          floatSpeed: Math.random() * 0.5 + 0.5,
+          floatOffset: Math.random() * Math.PI * 2
+        };
+        shapes.push(mesh);
+        scene.add(mesh);
+      }
+
+      // Animation loop
+      function animate() {
+        requestAnimationFrame(animate);
+
+        // Rotate particles
+        particles.rotation.y += 0.0005;
+        particles.rotation.x += 0.0002;
+
+        // Mouse interaction
+        particles.rotation.y += mouseX * 0.00005;
+        particles.rotation.x += mouseY * 0.00005;
+
+        // Animate shapes
+        const time = Date.now() * 0.001;
+        shapes.forEach(shape => {
+          shape.rotation.x += shape.userData.rotationSpeed;
+          shape.rotation.y += shape.userData.rotationSpeed * 0.5;
+          shape.position.y += Math.sin(time * shape.userData.floatSpeed + shape.userData.floatOffset) * 0.02;
+        });
+
+        renderer.render(scene, camera);
+      }
+      animate();
+
+      // Mouse move handler
+      document.addEventListener('mousemove', (e) => {
+        mouseX = (e.clientX - window.innerWidth / 2) * 0.1;
+        mouseY = (e.clientY - window.innerHeight / 2) * 0.1;
+      });
+
+      // Resize handler
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+    }
+
+    // Custom Cursor
+    function initCursor() {
+      const cursor = document.getElementById('cursor');
+      const cursorDot = document.getElementById('cursorDot');
+      let mouseX = 0, mouseY = 0;
+      let cursorX = 0, cursorY = 0;
+
+      document.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+      });
+
+      function animateCursor() {
+        cursorX += (mouseX - cursorX) * 0.1;
+        cursorY += (mouseY - cursorY) * 0.1;
+        cursor.style.left = cursorX + 'px';
+        cursor.style.top = cursorY + 'px';
+        cursorDot.style.left = mouseX + 'px';
+        cursorDot.style.top = mouseY + 'px';
+        requestAnimationFrame(animateCursor);
+      }
+      animateCursor();
+
+      // Add hover effect to interactive elements
+      document.querySelectorAll('a, button, .service-card, .trainer-card, .pricing-card, .stat-box').forEach(el => {
+        el.addEventListener('mouseenter', () => {
+          cursor.style.transform = 'scale(2)';
+          cursor.style.borderColor = '#ffaa00';
+        });
+        el.addEventListener('mouseleave', () => {
+          cursor.style.transform = 'scale(1)';
+          cursor.style.borderColor = '#ff4d00';
+        });
+      });
+    }
+
+    // GSAP Animations
+    function initAnimations() {
+      // Hero animations
+      gsap.from('.hero-badge', {
+        duration: 1,
+        y: -30,
+        opacity: 0,
+        ease: 'power3.out'
+      });
+
+      gsap.from('.hero h1', {
+        duration: 1.2,
+        y: 50,
+        opacity: 0,
+        ease: 'power3.out',
+        delay: 0.2
+      });
+
+      gsap.from('.hero p', {
+        duration: 1,
+        y: 30,
+        opacity: 0,
+        ease: 'power3.out',
+        delay: 0.4
+      });
+
+      gsap.from('.hero-buttons', {
+        duration: 1,
+        y: 30,
+        opacity: 0,
+        ease: 'power3.out',
+        delay: 0.6
+      });
+
+      gsap.from('.floating-card', {
+        duration: 1,
+        x: 100,
+        opacity: 0,
+        stagger: 0.2,
+        ease: 'power3.out',
+        delay: 0.8
+      });
+
+      // Scroll animations for sections
+      gsap.utils.toArray('.section-header').forEach(header => {
+        gsap.from(header, {
+          scrollTrigger: {
+            trigger: header,
+            start: 'top 80%',
+          },
+          duration: 1,
+          y: 50,
+          opacity: 0,
+          ease: 'power3.out'
+        });
+      });
+
+      // About section
+      gsap.from('.about-visual', {
+        scrollTrigger: {
+          trigger: '.about-grid',
+          start: 'top 70%',
+        },
+        duration: 1.2,
+        x: -50,
+        opacity: 0,
+        ease: 'power3.out'
+      });
+
+      gsap.from('.about-content', {
+        scrollTrigger: {
+          trigger: '.about-grid',
+          start: 'top 70%',
+        },
+        duration: 1,
+        x: 50,
+        opacity: 0,
+        ease: 'power3.out',
+        delay: 0.2
+      });
+
+      gsap.from('.stat-box', {
+        scrollTrigger: {
+          trigger: '.stats-container',
+          start: 'top 80%',
+        },
+        duration: 0.8,
+        y: 30,
+        opacity: 0,
+        stagger: 0.1,
+        ease: 'power3.out'
+      });
+
+      // Services cards
+      gsap.from('.service-card', {
+        scrollTrigger: {
+          trigger: '.services-grid',
+          start: 'top 75%',
+        },
+        duration: 0.8,
+        y: 50,
+        opacity: 0,
+        stagger: 0.15,
+        ease: 'power3.out'
+      });
+
+      // Trainers cards
+      gsap.from('.trainer-card', {
+        scrollTrigger: {
+          trigger: '.trainers-grid',
+          start: 'top 75%',
+        },
+        duration: 1,
+        y: 50,
+        opacity: 0,
+        stagger: 0.2,
+        ease: 'power3.out'
+      });
+
+      // Pricing cards
+      gsap.from('.pricing-card', {
+        scrollTrigger: {
+          trigger: '.pricing-grid',
+          start: 'top 75%',
+        },
+        duration: 0.8,
+        y: 30,
+        opacity: 0,
+        stagger: 0.15,
+        ease: 'power3.out'
+      });
+
+      // Contact section
+      gsap.from('.contact-info', {
+        scrollTrigger: {
+          trigger: '.contact-grid',
+          start: 'top 70%',
+        },
+        duration: 1,
+        x: -50,
+        opacity: 0,
+        ease: 'power3.out'
+      });
+
+      gsap.from('.contact-form', {
+        scrollTrigger: {
+          trigger: '.contact-grid',
+          start: 'top 70%',
+        },
+        duration: 1,
+        x: 50,
+        opacity: 0,
+        ease: 'power3.out',
+        delay: 0.2
+      });
+
+      // Navbar scroll effect
+      window.addEventListener('scroll', () => {
+        const navbar = document.getElementById('navbar');
+        if (window.scrollY > 50) {
+          navbar.classList.add('scrolled');
+        } else {
+          navbar.classList.remove('scrolled');
+        }
+      });
+
+      // Parallax effect on scroll
+      window.addEventListener('scroll', () => {
+        const scrolled = window.pageYOffset;
+        if (particles) {
+          particles.position.y = scrolled * 0.02;
+        }
+      });
+    }
+
+    // Mobile Menu
     function toggleMenu() {
       const menu = document.getElementById('mobileMenu');
-      const hamburger = document.getElementById('hamburger');
+      const hamburger = document.querySelector('.hamburger');
       menu.classList.toggle('active');
       hamburger.classList.toggle('active');
     }
@@ -1525,73 +1851,9 @@
       alert('Thank you for your message! We will get back to you soon.');
     }
 
-    // Scroll Animation Observer
-    const observerOptions = {
-      threshold: 0.1,
-      rootMargin: '0px 0px -50px 0px'
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-        }
-      });
-    }, observerOptions);
-
-    document.querySelectorAll('.fade-in').forEach(el => {
-      observer.observe(el);
-    });
-
-    // Navbar scroll effect
-    window.addEventListener('scroll', () => {
-      const navbar = document.getElementById('navbar');
-      if (window.scrollY > 50) {
-        navbar.classList.add('scrolled');
-      } else {
-        navbar.classList.remove('scrolled');
-      }
-    });
-
-    // Glowing cursor effect
-    const cursor = document.getElementById('glowCursor');
-    let mouseX = 0, mouseY = 0;
-    let cursorX = 0, cursorY = 0;
-
-    document.addEventListener('mousemove', (e) => {
-      mouseX = e.clientX;
-      mouseY = e.clientY;
-    });
-
-    function animateCursor() {
-      cursorX += (mouseX - cursorX) * 0.1;
-      cursorY += (mouseY - cursorY) * 0.1;
-      cursor.style.left = cursorX - 10 + 'px';
-      cursor.style.top = cursorY - 10 + 'px';
-      requestAnimationFrame(animateCursor);
-    }
-    animateCursor();
-
-    // Create floating particles
-    const particlesContainer = document.getElementById('particles');
-    for (let i = 0; i < 20; i++) {
-      const particle = document.createElement('div');
-      particle.className = 'particle';
-      particle.style.left = Math.random() * 100 + '%';
-      particle.style.animationDelay = Math.random() * 8 + 's';
-      particle.style.animationDuration = (6 + Math.random() * 4) + 's';
-      particlesContainer.appendChild(particle);
-    }
-
-    // Parallax effect on scroll
-    window.addEventListener('scroll', () => {
-      const scrolled = window.pageYOffset;
-      const shapes = document.querySelectorAll('.floating-shape');
-      shapes.forEach((shape, index) => {
-        const speed = 0.05 + (index * 0.01);
-        shape.style.transform = `translateY(${scrolled * speed}px)`;
-      });
-    });
+    // Initialize
+    initThreeJS();
+    initCursor();
   </script>
 </body>
 </html>
